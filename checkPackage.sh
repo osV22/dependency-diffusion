@@ -2,6 +2,7 @@
  
 # API CREDS HERE
  
+ 
 while getopts "n:" arg; do
   case $arg in
     n) packageName=$OPTARG;;
@@ -11,13 +12,11 @@ done
 echo "REACHED and Package Name: $packageName"
  
  
-# PRE-CHECKS:
-    # which python
-    # which pip
-    # which curl
  
 # Get Page from PyPI
 packagePage=$(curl -s https://pypi.org/project/$packageName/ | grep "github.com/repos/") # silent so user does not notice anything
+ 
+#echo $packagePage
  
 # Check if there is a valid repo:
 if [[ $packagePage != *"github.com/repos/"* ]]; then
@@ -37,6 +36,8 @@ ghRepoInfo=$(exec
       -H "Accept: application.vnd.github.v3+json" \
       -u $ghUsername:$ghAPItoken https://api.github.com/repos/$author/$packageName
 )
+ 
+echo $ghRepoInfo
  
 echo $ghRepoInfo | grep "Moved Permanently" && echo "MOVED"
  
@@ -68,4 +69,19 @@ if [[ $starCount -gt 10 ]]; then
    echo "Min Star Req Met!"
 fi
  
-# TODO: Get repo history and find other metrics that are security-worthy
+ 
+# Get Repo Age
+currentDate=$(date '+%y-%m-%d')
+ 
+createdAt=$(echo $ghRepoInfo | grep -o "created_at\": .*" | awk '{print $2}' | tr -d '",:' | awk -F"T" '{print $1}' ) # I guess I'm into self-harm at this point
+echo "Created on: $createdAt"
+ 
+repoAge=$(( ($(date -d "$currentDate" +%s) - $(date -d "$createdAt" +%s)) / (60*60*24) ))
+echo $repoAge
+ 
+if [[ $repoAge -lt 4000 ]]; 
+then
+   echo "Repo is very young! FAILED"
+else
+   echo "Package is OLD enough! PASSED"
+fi
