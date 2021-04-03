@@ -3,14 +3,19 @@
 # API CREDS HERE
  
  
-while getopts "n:" arg; do
-  case $arg in
-    n) packageName=$OPTARG;;
-  esac
+while getopts "p:a:s:" arg; do #Later add v: for verbose
+	case $arg in
+		p) packageName=$OPTARG;;
+		a) age=$OPTARG;;
+		s) stars=$OPTARG;;
+	esac
 done
  
-echo "REACHED and Package Name: $packageName"
  
+echo "---- reportPackage REACHED-------"
+echo "Package Name: $packageName"
+echo "Age Min: $age"
+echo "Stars Min: $stars"
  
  
 # Get Page from PyPI
@@ -81,7 +86,7 @@ echo $repoAge
  
 if [[ $repoAge -lt 4000 ]]; 
 then
-   echo "Repo is very young! FAILED"
+   echo "Repo is very NEW! FAILED"
 else
    echo "Package is OLD enough! PASSED"
 fi
