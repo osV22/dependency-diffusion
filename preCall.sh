@@ -1,7 +1,8 @@
-preexec() { 
+#!/bin/bash
  
-	local minAge=20
-	local minStars=20
+preexec() { 
+	local minAge=1337
+	local minStars=1337
  
    local cmd=${1,,}
    echo "Command Entered: $cmd"
@@ -15,9 +16,9 @@ preexec() {
        echo "x-x-x-x- pip install"
        requestCheck
       ;;
-     "pip5 install "[0-9a-z]*) #will change to pip3 later
+     "pip5 install "[0-9a-z]*) # Will change to pip3 later
        # Pip3 Procedure
-       echo "x-x-x-x- PIP 5 CALLED" # testing, don't want to trigger an actual pip3 request
+       echo "x-x-x-x- PIP 5 CALLED" # Testing, don't want to trigger an actual request
        requestCheck "3"
       ;;
    esac

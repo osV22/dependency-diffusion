@@ -1,21 +1,22 @@
 #!/bin/bash
  
-# API CREDS HERE
- 
+# GitHub API CREDS HERE (OPTIONAL, public is capped at 60 req/ day)
+# Better to spawn a process instead of inserting creds, but that's up to you!
+ghUsername=""
+ghAPItoken=""
  
 while getopts "p:a:s:" arg; do #Later add v: for verbose
 	case $arg in
 		p) packageName=$OPTARG;;
-		a) age=$OPTARG;;
-		s) stars=$OPTARG;;
+		a) minAge=$OPTARG;;
+		s) minStars=$OPTARG;;
 	esac
 done
  
- 
 echo "---- reportPackage REACHED-------"
 echo "Package Name: $packageName"
-echo "Age Min: $age"
-echo "Stars Min: $stars"
+echo "Age Min: $minAge"
+echo "Stars Min: $minStars"
  
  
 # Get Page from PyPI
@@ -42,15 +43,10 @@ ghRepoInfo=$(exec
       -u $ghUsername:$ghAPItoken https://api.github.com/repos/$author/$packageName
 )
  
-echo $ghRepoInfo
- 
-echo $ghRepoInfo | grep "Moved Permanently" && echo "MOVED"
- 
 #moved=$(echo $ghRepoInfo | grep "Moved Permanently")
  
- 
 if [[ $ghRepoInfo == *"Moved Permanently"* ]]; then
-  echo "-------------- MOVED ----------"
+  echo "---------- MOVED ----------"
   ghArr=($ghRepoInfo)
   #newLocation=$(echo $ghRepoInfo | grep )
   echo ""
@@ -70,8 +66,13 @@ fi
 declare -i starCount=$(echo $ghRepoInfo | grep -o "stargazers_count\": .*" | awk '{print $2}' | tr -d '",:' ) # I guess I'm into self-harm at this point
 echo "Total Stars: $starCount"
  
-if [[ $starCount -gt 10 ]]; then
-   echo "Min Star Req Met!"
+if [[ $starCount -lt $minStars ]]; 
+then
+   echo "Not STARRED ENOUGH! FAILED"
+	printf "\nstar count: $starCount\nmin stars req: $minStars\n\n"
+else
+   echo "STARRED! PASSED"
+	printf "\nstar count: $starCount\nmin stars req: $minStars\n\n"
 fi
  
  
@@ -82,9 +83,9 @@ createdAt=$(echo $ghRepoInfo | grep -o "created_at\": .*" | awk '{print $2}' | t
 echo "Created on: $createdAt"
  
 repoAge=$(( ($(date -d "$currentDate" +%s) - $(date -d "$createdAt" +%s)) / (60*60*24) ))
-echo $repoAge
+echo "Repo age: $repoAge days old"
  
-if [[ $repoAge -lt 4000 ]]; 
+if [[ $repoAge -lt $minAge ]]; 
 then
    echo "Repo is very NEW! FAILED"
 else
