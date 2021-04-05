@@ -1,2 +1,2 @@
 # dependency-diffusion
-Bash script to log suspicious PyPI packages downloaded
+Work-In-Progress - Bash script to log suspicious PyPI packages downloaded
