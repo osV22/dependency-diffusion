@@ -5,13 +5,15 @@
 ghUsername=""
 ghAPItoken=""
  
-while getopts "p:a:s:" arg; do #Later add v: for verbose
+while getopts "p:a:s:o:" arg; do #Later add v: for verbose
 	case $arg in
 		p) packageName=$OPTARG;;
 		a) minAge=$OPTARG;;
 		s) minStars=$OPTARG;;
+      o) outputLoc=$OPTARG;; #! TODO: Start logging feature
 	esac
 done
+ 
  
 echo "---- reportPackage REACHED-------"
 echo "Package Name: $packageName"
@@ -70,6 +72,7 @@ if [[ $starCount -lt $minStars ]];
 then
    echo "Not STARRED ENOUGH! FAILED"
 	printf "\nstar count: $starCount\nmin stars req: $minStars\n\n"
+ 
 else
    echo "STARRED! PASSED"
 	printf "\nstar count: $starCount\nmin stars req: $minStars\n\n"
