@@ -94,20 +94,35 @@ then
  
 else
    echo "Package is OLD enough! PASSED"
-      # TRIGGER a log entry
-   id="1"
-   date="asdadad"
+   # TRIGGER a log entry
+   id=1
+   date="12/12/12"
    package="matplotlib"
+   pip_version=3
+   user="x"
+   reason="Package only has x stars, which is y less than the minimum set in the diffusion-preexec function."
+   warning_given="Package is too new and has been uninstalled."
+   action_taken="Uninstalled"
+ 
  
    jsonTemp='
       {
          "id":"%s",
          "date":"%s",
-         "package":"%s"
-      }\n'
-   report=$(printf "$jsonTemp" "$id" "$date" "$package")
-   echo $report | json_pp -json_opt pretty,canonical > log.json
+         "package":"%s", # change to array later on 
+         "pip_version":"%s",
+         "user":"%s",
+         "reason":"%s",
+         "warning_given":"%s",
+         "action_taken":"%s"
+      }'
+
+   #! TODO: Wrap in an if-else and insert arr start if empty, add actual vars, 
+   report=$(printf "$jsonTemp" "$id" "$date" "$package" "$pip_version" "$user" "$reason" "$warning_given" "$action_taken")
+   sed -i '$ d' log.json
+   echo -e "$report,\n]" >> log.json # b/c json_pp does not do tabs/ non-json formats
  
-   # TODO: IMPLEMENT THIS for the final solution
-   # echo '{"id": 1, "report": [{"package":"matplotlib", "date":"12/12/12"}]}' | json_pp -json_opt pretty,canonical
+   # For regular json. 
+   #echo "$jsonTemp" | tr -d '\n' | tr -d ' '
+ 
 fi

@@ -95,12 +95,12 @@ else
       fi
  
       echo -e "\e[93m[+]\e[0m 4. Generating a pre-exec function to detect pip installs"
-      echo -e "\t\e[92m∟ Saved \e[96mpreexec-diffusion.sh\e[0m in $instLocation\e[0m"
+      echo -e "\t\e[92m∟ Saved \e[96mdiffusion-preexec.sh\e[0m in $instLocation\e[0m"
  
  
-      echo -e "\n\e[93m[+]\e[0m 5. Adding \e[96mbash-preexec.sh\e[0m and \e[96mdependency-diffusion.sh\e[0m function to .bashrc"
+      echo -e "\n\e[93m[+]\e[0m 5. Adding \e[96mbash-preexec.sh\e[0m and \e[96mdiffusion-preexec.sh\e[0m function to .bashrc"
       # NOTE: MUST BE THE LAST ENTRY IN YOUR BASH CONFIG FILE (~/.bashrc, ~/.profile, ~/.bash_profile, etc).
-      #echo "[[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh && source ~/dependency-diffusion.sh" >> .bashrc
+      #echo "[[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh && source ~/diffusion-preexec.sh" >> .bashrc
  
       echo -e "\n\e[93m[+]\e[0m 6. Creating a log file for bad/ reported packages"
  
@@ -164,4 +164,4 @@ preexec() {
       bash reportPackage.sh -p "$packageName" -a $minAge -s $minStars -o "$outputLoc"
    }  
 }
-' > preexec-diffusion.sh
+' > diffusion-preexec.sh 
