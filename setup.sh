@@ -142,26 +142,30 @@ preexec() {
    echo "Command Entered: $cmd"
  
    local cmdArr=($cmd)
-   local packageName="${cmdArr[@]:2}"
+ 
+   if [[ " ${cmd} " == *" sudo "*  ]]; then
+      local packageName="${cmdArr[@]:3}"
+   else
+      local packageName="${cmdArr[@]:2}"
+   fi
  
    case "$cmd" in 
-      "pip install "[0-9a-z]*)
+      "pip install "[0-9a-z]* | "sudo pip install "[0-9a-z]*)
          # Pip Procedure
          echo "x-x-x-x- pip install"
-         requestCheck
+         requestCheck "pip"
       ;;
-      "pip5 install "[0-9a-z]*) #will change to pip3 later
+      "pip3 install "[0-9a-z]* | "sudo pip3 install "[0-9a-z]*)
          # Pip3 Procedure
-         echo "x-x-x-x- PIP 5 CALLED" #will change to pip3 later
-         requestCheck "3"
-         echo "STOPPING PROCESS"
+         echo "x-x-x-x- PIP 3 CALLED" 
+         requestCheck "pip3"
       ;;
    esac
  
    function requestCheck() {
       echo "Pip Version: pip $1"
       echo "Package Name: $packageName"
-      bash reportPackage.sh -p "$packageName" -a $minAge -s $minStars -o "$outputLoc"
+      bash reportPackage.sh -c "$cmd" -t "$1" -p "$packageName" -a $minAge -s $minStars -o "$outputLoc"
    }  
 }
 ' > diffusion-preexec.sh 
