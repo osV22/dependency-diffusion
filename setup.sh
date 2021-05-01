@@ -5,18 +5,22 @@ reqsMet=()
  
 re='^[0-9]+$'
 instLocation=~/
+logFileDest=~/
+verbose="false" #! TODO: implement verbose mode to checkPackage 
  
 printHelp() {
    # Display Help
    echo "Dependency-Diffusion - Filter, log, and block suspicious python packages."
    echo
-   echo "Syntax: bash setup.sh [-h | -a -s]"
+   echo "Usage: ./setup.sh [-h | -a -s -o]"
    echo "options:"
    echo -e "\t-h   Print the help page."
    echo -e "\t-a   Set the minimum age requirement of a package in days."
    echo -e "\t-s   Set the minimum stars requirement for a package's GitHub repo."
-   echo -e "\t-o   Creates a log file for all reported packages."
-   echo -e "\nExample: ./setup.sh -a 365 -s 1337 -o bad_package_log.json"
+   echo -e "\t-o   Creates a log file for all reported packages, JSON format."
+   echo -e "\t-v   Verbose mode. Only recommended for debugging. [-v true] to enable. Prints \n\t\tPyPI & GitHub package URL and their stats before every package install."
+   echo -e "\n\nExample: bash setup.sh -a 90 -s 29 -o bad_package_log.json"
+   echo -e "\nExample: bash setup.sh -a 90 -s 29 -v true -o bad_package_log.json\n"
    echo
 }
  
@@ -27,15 +31,14 @@ preCheck() {
    fi
 }
  
-reportLog() {
+logFile() {
    if [[ ! -d "$logDirectory" ]]; then
-      logDirectory=~/
       echo -e "\t∟ No directory specified for the log, defaulting to \e[96m$logDirectory\e[0m"
-      echo -e "\t\e[92m∟ Log for reported packages can be found at\e[0m \e[96m$logDirectory$outputLoc\e[0m"
-      #touch   
+      echo -e "\t\e[92m∟ Log for reported packages can be found at\e[0m \e[96m$instLocation$logFile\e[0m"
+      echo -e "[\n" > $instLocation$logFile
    else
    echo -e "\t\e[92m∟ Log for reported packages can be found at\e[0m \e[96m$outputLoc\e[0m"
-   #touch   
+   echo -e "[\n" > $outputLoc
    fi
 }
  
@@ -43,18 +46,21 @@ for i in "${reqsArr[@]}"; do
    preCheck "$i"; 
 done
  
-while getopts "ha:s:o:" arg; do #Later add v: for verbose
+while getopts "ha:s:v:o:" arg; do #Later add v: for verbose
    case $arg in
       h) printHelp && exit;;
       a) minAge=$OPTARG;;
       s) minStars=$OPTARG;;
+      v) verbose=$OPTARG;;
       o) outputLoc=$OPTARG;;
    esac
 done
  
+logDirectory="${outputLoc%/*}"
+logFile="${outputLoc##*/}"
  
-if [ "$#" -lt 6 ]; then
-   echo -e "\n\e[101m[!] Install FAILED: MISSING AN ARGUMENT\e[0m\n">&2; 
+if [[ "$#" -lt 6 ]]; then
+   echo -e "\n\e[101m[!] Install FAILED: MISSING ARGUMENT(s)\e[0m\n">&2; 
    printHelp
    exit 1
    if ! [[ $minAge =~ $re ]] && [[ $minStars =~ $re ]]; then
@@ -64,7 +70,6 @@ if [ "$#" -lt 6 ]; then
       exit 1
    fi
 fi
- 
  
 echo -e "\e[93m[+]\e[0m 1. Checking Requirements"
 echo -e "\t\e[92m∟ Reqs Met: ${reqsMet[@]}\e[0m"
@@ -104,24 +109,14 @@ else
  
       echo -e "\n\e[93m[+]\e[0m 6. Creating a log file for bad/ reported packages"
  
-      logDirectory="${outputLoc%/*}"
-      logFile="${outputLoc##*/}"
- 
       if [[ ! -d "$logDirectory" ]] && [[ ! ${logFile: -5} == ".json" ]]; then
          echo -e "\n\e[101m[!] Install FAILED: $logDirectory is not a valid directory to save your logs in!\e[0m\n">&2;
  
       elif [[ -z "$logFile" ]]; then
          echo "ERROR: NO FILE SPECIFIED TO SAVE LOGS"
-         #exit 1
- 
+         #exit 1  
       else
-         if [[ ${logFile: -5} == ".json" ]]; then
-            echo "JSON IT IS!"
-         else
-            echo "NOT JSON"
-         fi
- 
-         reportLog
+         logFile
       fi
  
       echo -e "\n\e[93m[+]\e[0m 7. Updating/ refreshing your bash configuration file"
@@ -169,3 +164,4 @@ preexec() {
    }  
 }
 ' > diffusion-preexec.sh 
+
