@@ -1,5 +1,5 @@
 #!/bin/bash
- 
+
 # OPTIONAL: GitHub API CREDS HERE (public is capped at 60 req/ day)
 # Better to spawn a process instead of inserting creds, but that's up to you!
 ghUsername=""
@@ -74,25 +74,11 @@ while getopts "c:t:p:a:s:v:o:" arg; do #Later add v: for verbose
    esac
 done
  
-# if [[]]; then
-# fi
-echo "---- reportPackage REACHED-------"
-echo "Is Verbose: $verbose"
-echo "Commnad Entered: $cmd"
-echo "Pip Version Called: $pipVersion"
-echo "Package Name: $packageName"
-echo "Output Loc: $outputLoc"
-echo "Age Min: $minAge"
-echo "Stars Min: $minStars"
- 
-# Get Page from PyPI | silent so user does not notice anything
+# Silent so user does not notice anything
 pypiUrl="https://pypi.org/project/$packageName/"
 packagePage=$(curl -s $pypiUrl | grep "github.com/repos/")  
  
-# Get Author
-echo "--------"
 author=$(echo $packagePage | cut -f5 -d/)
-echo "Author is: $author"
  
 # GitHub Repo Page
 ghRepoUrl="https://api.github.com/repos/$author/$packageName"
@@ -102,15 +88,9 @@ ghRepoInfo=$(exec
       -u $ghUsername:$ghAPItoken $ghRepoUrl
 )
  
-#moved=$(echo $ghRepoInfo | grep "Moved Permanently")
- 
 if [[ $ghRepoInfo == *"Moved Permanently"* ]]; then
-   echo "---------- MOVED ----------"
    ghArr=($ghRepoInfo)
-   #newLocation=$(echo $ghRepoInfo | grep )
-   echo ""
    movedUrl=$(echo "${ghArr[5]}" | tr -d '",') 
-   echo $movedUrl
  
    ghRepoInfo=$(exec 
    curl -s \
@@ -119,24 +99,19 @@ if [[ $ghRepoInfo == *"Moved Permanently"* ]]; then
    )
 fi
  
-#echo $ghRepoInfo
- 
 # Stars Num
 declare -i repoStars=$(echo $ghRepoInfo | grep -o "stargazers_count\": .*" | awk '{print $2}' | tr -d '",:' ) 
-echo "Total Stars: $repoStars"
  
 # Get Repo Age
 currentDate=$(date '+%y-%m-%d')
 createdAt=$(echo $ghRepoInfo | grep -o "created_at\": .*" | awk '{print $2}' | tr -d '",:' | awk -F"T" '{print $1}' ) 
-echo "Created on: $createdAt"
 repoAge=$(( ($(date -d "$currentDate" +%s) - $(date -d "$createdAt" +%s)) / (60*60*24) ))
-echo "Repo age: $repoAge days old"
  
 if [[ " ${cmd} " == *" sudo "*  ]]; then
    logEntry "sudo_install"
 elif [[ $packagePage != *"github.com/repos/"* ]]; then
    logEntry "broken_link"
-   exit 
+   exit 1
 elif [[ $repoStars -lt $minStars ]] && [[ $repoAge -lt $minAge ]]; then
    logEntry "age and star count"
 elif [[ $repoAge -lt $minAge ]]; then
@@ -144,4 +119,25 @@ elif [[ $repoAge -lt $minAge ]]; then
 elif [[ $repoStars -lt $minStars ]]; then
    logEntry "stars" 
 fi
-
+ 
+if [[ $verbose == "true" ]]; then
+   echo -e "\nDependency-Diffusion: Pip Package Install Detected"
+   echo -e "[+] Package Info:"
+   echo -e "\tName: $packageName"
+   echo -e "\tAuthor: $author"
+   echo -e "\tStats: (Age) $repoAge days old, (Stars) $repoStars"
+   echo -e "\tDate Created: $createdAt"
+   echo -e "\tPyPI URL: $pypiUrl"
+   echo -e "\tGitHub Repo URL: $ghRepoUrl"
+   echo
+   echo -e "[+] Logging Script Info:"
+   echo -e "\tVerbose Mode Enabled: $verbose"
+   echo -e "\tMinimum Age Required: $minAge"
+   echo -e "\tMinimum Stars Required: $minStars"
+   echo -e "\tLog file: $outputLoc"
+   echo
+   echo -e "[+] Commnad Info:"
+   echo -e "\tCommnad Entered: $cmd"
+   echo -e "\tPip Version Called: $pipVersion"
+   echo
+fi
