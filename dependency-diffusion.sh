@@ -27,7 +27,7 @@ logEntry() {
    elif [[ $1 == "age" ]]; then
       local problem="Repository age: $repoAge days old... Minimum age required: $minStars"
    else 
-      local problem="Two or more dependency-diffusion minimum requirements were not met for the package to be installed."
+      local problem="Two or more dependency-diffusion minimum requirements were not met for the $packageName package."
    fi
  
    echo -e "\n[!] Problem: $problem\n[!] $warning_given\n[+] Note: $action_taken\n"
