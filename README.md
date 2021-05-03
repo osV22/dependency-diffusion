@@ -4,6 +4,8 @@
 Logs suspicious pip package installs. 
 - This was done to sharpen my bash scripting skills in preparation for an internship this summer. 100% pure shell, with the least amount of dependencies possible (only 1 used, @rcaloras's awesome [bash-preexec](https://github.com/rcaloras/bash-preexec)).
   - I typically use python for everything and this would have been much easier with python, but it is better to improve in other areas. 
+- Why not "defusion?"
+  - It logs specific installs, and does **not** defuse an install as the original intention was.
 
 ## What?
 - Logs pip package installs that do not meet certain options set by you, such as minimum age and stars the repo has, sudo installs, and if a package is not on GitHub. 
